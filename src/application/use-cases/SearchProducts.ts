@@ -31,9 +31,12 @@ export class SearchProducts {
           offset
         );
 
+    // Filtro los productos que estan activos y disponibles
+    const availableProducts = products.filter(product => product.isAvailable());
+
     return {
-      products: products.slice(0, limit),
-      hasMore: products.length > limit,
+      products: availableProducts.slice(0, limit),
+      hasMore: availableProducts.length > limit,
       limit,
       offset,
     };
