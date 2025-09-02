@@ -1,0 +1,1 @@
+export { JsonProductRepository } from "./JsonProductRepository";
