@@ -1,4 +1,4 @@
-import "module-alias/register";
+import "./alias-setup";
 import { FastifyServer } from "@/infrastructure/http/FastifyServer";
 
 async function main() {

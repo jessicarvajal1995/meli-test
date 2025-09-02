@@ -1,0 +1,694 @@
+{
+	"info": {
+		"_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+		"name": "MercadoLibre Product API",
+		"description": "API de backend que proporciona todos los datos necesarios para admitir una página de detalles del artículo, inspirada en MercadoLibre.\n\n## Características\n- Arquitectura Hexagonal\n- Persistencia en JSON\n- Validación con Zod\n- Manejo de errores robusto\n- Testing comprehensivo\n\n## Base URL\n- **Desarrollo**: http://localhost:3000\n- **Producción**: {baseUrl}\n\n## Endpoints Principales\n1. Health Check\n2. Obtener Detalle de Producto\n3. Buscar Productos\n4. Productos Relacionados",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has status ok\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.status).to.eql(\"ok\");",
+							"});",
+							"",
+							"pm.test(\"Response has timestamp\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.timestamp).to.exist;",
+							"});",
+							"",
+							"pm.test(\"Response has uptime\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.uptime).to.be.a('number');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Endpoint para verificar el estado del servidor.\n\n### Respuesta\n- **200**: Servidor funcionando correctamente\n- **500**: Error interno del servidor\n\n### Ejemplo de respuesta:\n```json\n{\n  \"status\": \"ok\",\n  \"timestamp\": \"2024-01-15T10:30:00.000Z\",\n  \"uptime\": 1.234\n}\n```"
+			},
+			"response": [
+				{
+					"name": "Health Check - Success",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/health",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"health"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"status\": \"ok\",\n  \"timestamp\": \"2024-01-15T10:30:00.000Z\",\n  \"uptime\": 1.234\n}"
+				}
+			]
+		},
+		{
+			"name": "Obtener Detalle de Producto",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has data object\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.exist;",
+							"});",
+							"",
+							"pm.test(\"Product has required fields\", function () {",
+							"    const product = pm.response.json().data;",
+							"    pm.expect(product).to.have.property('id');",
+							"    pm.expect(product).to.have.property('title');",
+							"    pm.expect(product).to.have.property('price');",
+							"    pm.expect(product).to.have.property('stock');",
+							"    pm.expect(product).to.have.property('status');",
+							"});",
+							"",
+							"pm.test(\"Price has amount and currency\", function () {",
+							"    const price = pm.response.json().data.price;",
+							"    pm.expect(price).to.have.property('amount');",
+							"    pm.expect(price).to.have.property('currency');",
+							"    pm.expect(price.amount).to.be.a('number');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/{{sampleProductId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{sampleProductId}}"
+					]
+				},
+				"description": "**Endpoint principal** que obtiene todos los detalles necesarios de un producto para mostrar la página de detalles.\n\n### Parámetros\n- `id` (string, requerido): ID único del producto\n\n### Respuestas\n- **200**: Producto encontrado\n- **400**: ID de producto inválido\n- **404**: Producto no encontrado\n- **500**: Error interno del servidor\n\n### Ejemplo de respuesta exitosa:\n```json\n{\n  \"data\": {\n    \"id\": \"MLU475845508\",\n    \"title\": \"Google Pixel 8 Pro 128GB Dorado\",\n    \"description\": \"Diseño moderno y funcionalidad excepcional...\",\n    \"price\": {\n      \"amount\": 417.04,\n      \"currency\": \"USD\"\n    },\n    \"stock\": {\n      \"quantity\": 42,\n      \"isAvailable\": true\n    },\n    \"status\": \"active\",\n    \"categoryId\": \"CAT_ELECTRONICS_PHONES\"\n  },\n  \"statusCode\": 200\n}\n```"
+			},
+			"response": [
+				{
+					"name": "Producto encontrado",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products/MLU475845508",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"MLU475845508"
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"data\": {\n    \"id\": \"MLU475845508\",\n    \"title\": \"Google Pixel 8 Pro 128GB Dorado\",\n    \"description\": \"Diseño moderno y funcionalidad excepcional. Compatible con los últimos estándares.\",\n    \"price\": {\n      \"amount\": 417.04,\n      \"currency\": \"USD\"\n    },\n    \"stock\": {\n      \"quantity\": 42,\n      \"isAvailable\": true\n    },\n    \"status\": \"inactive\",\n    \"categoryId\": \"CAT_ELECTRONICS_PHONES\",\n    \"createdAt\": \"2023-10-29T21:46:00.103Z\",\n    \"updatedAt\": \"2024-05-23T07:59:00.810Z\",\n    \"isAvailable\": false\n  },\n  \"statusCode\": 200\n}"
+				},
+				{
+					"name": "Producto no encontrado",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products/INVALID_ID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"INVALID_ID"
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"Product with id INVALID_ID not found\",\n  \"statusCode\": 404\n}"
+				}
+			]
+		},
+		{
+			"name": "Buscar Productos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has data object\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.exist;",
+							"});",
+							"",
+							"pm.test(\"Data has products array\", function () {",
+							"    const data = pm.response.json().data;",
+							"    pm.expect(data.products).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Data has pagination\", function () {",
+							"    const data = pm.response.json().data;",
+							"    pm.expect(data.pagination).to.exist;",
+							"    pm.expect(data.pagination).to.have.property('limit');",
+							"    pm.expect(data.pagination).to.have.property('offset');",
+							"    pm.expect(data.pagination).to.have.property('total');",
+							"});",
+							"",
+							"pm.test(\"Products have required fields\", function () {",
+							"    const products = pm.response.json().data.products;",
+							"    if (products.length > 0) {",
+							"        const product = products[0];",
+							"        pm.expect(product).to.have.property('id');",
+							"        pm.expect(product).to.have.property('title');",
+							"        pm.expect(product).to.have.property('price');",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products?limit={{defaultLimit}}&offset=0",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "{{defaultLimit}}",
+							"description": "Número de productos por página (1-50)"
+						},
+						{
+							"key": "offset",
+							"value": "0",
+							"description": "Número de productos a saltar"
+						},
+						{
+							"key": "categoryId",
+							"value": "",
+							"description": "Filtrar por categoría específica",
+							"disabled": true
+						}
+					]
+				},
+				"description": "Busca productos con filtros opcionales y paginación.\n\n### Query Parameters\n- `categoryId` (string, opcional): Filtrar por categoría\n- `limit` (number, opcional): Número de productos por página (default: 10, max: 50)\n- `offset` (number, opcional): Número de productos a saltar (default: 0)\n\n### Respuestas\n- **200**: Búsqueda exitosa\n- **400**: Parámetros inválidos\n- **500**: Error interno del servidor\n\n### Ejemplo de respuesta:\n```json\n{\n  \"data\": {\n    \"products\": [...],\n    \"pagination\": {\n      \"limit\": 10,\n      \"offset\": 0,\n      \"total\": 100,\n      \"hasNext\": true,\n      \"hasPrevious\": false\n    }\n  },\n  \"statusCode\": 200\n}\n```"
+			},
+			"response": [
+				{
+					"name": "Búsqueda exitosa",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products?limit=2&offset=0",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "2"
+								},
+								{
+									"key": "offset",
+									"value": "0"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": \"MLU968942089\",\n        \"title\": \"MacBook Pro 15\\\" M3 2TBGB Plata\",\n        \"description\": \"Diseño moderno y funcionalidad excepcional. Compatible con los últimos estándares.\",\n        \"price\": {\n          \"amount\": 2919.22,\n          \"currency\": \"USD\"\n        },\n        \"categoryId\": \"CAT_ELECTRONICS_LAPTOPS\",\n        \"status\": \"active\",\n        \"stock\": {\n          \"quantity\": 9,\n          \"isAvailable\": true\n        },\n        \"isAvailable\": true\n      },\n      {\n        \"id\": \"MLU768416607\",\n        \"title\": \"OnePlus 12 512GB Blanco\",\n        \"description\": \"Diseño moderno y funcionalidad excepcional. Compatible con los últimos estándares.\",\n        \"price\": {\n          \"amount\": 376.65,\n          \"currency\": \"USD\"\n        },\n        \"categoryId\": \"CAT_ELECTRONICS_PHONES\",\n        \"status\": \"discontinued\",\n        \"stock\": {\n          \"quantity\": 25,\n          \"isAvailable\": true\n        },\n        \"isAvailable\": false\n      }\n    ],\n    \"pagination\": {\n      \"limit\": 2,\n      \"offset\": 0,\n      \"total\": 100,\n      \"hasNext\": true,\n      \"hasPrevious\": false\n    }\n  },\n  \"statusCode\": 200\n}"
+				}
+			]
+		},
+		{
+			"name": "Buscar Productos por Categoría",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"All products belong to requested category\", function () {",
+							"    const data = pm.response.json().data;",
+							"    const categoryId = pm.request.url.query.get('categoryId');",
+							"    ",
+							"    if (categoryId && data.products.length > 0) {",
+							"        data.products.forEach(product => {",
+							"            pm.expect(product.categoryId).to.eql(categoryId);",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products?categoryId={{sampleCategoryId}}&limit={{defaultLimit}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products"
+					],
+					"query": [
+						{
+							"key": "categoryId",
+							"value": "{{sampleCategoryId}}",
+							"description": "Categoría específica para filtrar"
+						},
+						{
+							"key": "limit",
+							"value": "{{defaultLimit}}",
+							"description": "Número de productos a retornar"
+						}
+					]
+				},
+				"description": "Busca productos filtrados por una categoría específica.\n\n### Categorías disponibles:\n- `CAT_ELECTRONICS_PHONES`\n- `CAT_ELECTRONICS_LAPTOPS` \n- `CAT_ELECTRONICS_TABLETS`\n- `CAT_CLOTHING_SHIRTS`\n- `CAT_CLOTHING_PANTS`\n- `CAT_HOME_FURNITURE`\n- `CAT_HOME_KITCHEN`\n- `CAT_SPORTS_FITNESS`\n- `CAT_BOOKS_FICTION`"
+			},
+			"response": []
+		},
+		{
+			"name": "Productos Relacionados",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has data object\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.data).to.exist;",
+							"});",
+							"",
+							"pm.test(\"Data has products array\", function () {",
+							"    const data = pm.response.json().data;",
+							"    pm.expect(data.products).to.be.an('array');",
+							"});",
+							"",
+							"pm.test(\"Number of products respects limit\", function () {",
+							"    const data = pm.response.json().data;",
+							"    const limit = parseInt(pm.request.url.query.get('limit') || '4');",
+							"    pm.expect(data.products.length).to.be.at.most(limit);",
+							"});",
+							"",
+							"pm.test(\"Related products exclude original product\", function () {",
+							"    const data = pm.response.json().data;",
+							"    const originalId = pm.request.url.path.find(segment => segment.startsWith('MLU'));",
+							"    ",
+							"    if (originalId) {",
+							"        data.products.forEach(product => {",
+							"            pm.expect(product.id).to.not.eql(originalId);",
+							"        });",
+							"    }",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/{{sampleProductId}}/related?limit={{relatedLimit}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{sampleProductId}}",
+						"related"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "{{relatedLimit}}",
+							"description": "Número de productos relacionados (1-20, default: 4)"
+						}
+					]
+				},
+				"description": "Obtiene productos relacionados basados en categoría y características similares.\n\n### Parámetros\n- `id` (string, requerido): ID del producto base\n- `limit` (number, opcional): Número de productos relacionados (1-20, default: 4)\n\n### Lógica de Relacionados\n1. Productos de la misma categoría\n2. Excluye el producto original\n3. Prioriza productos activos\n4. Ordena por relevancia\n\n### Respuestas\n- **200**: Productos relacionados encontrados\n- **400**: ID de producto o límite inválido\n- **404**: Producto base no encontrado\n- **500**: Error interno del servidor\n\n### Ejemplo de respuesta:\n```json\n{\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": \"MLU768416607\",\n        \"title\": \"OnePlus 12 512GB Blanco\",\n        \"price\": { \"amount\": 376.65, \"currency\": \"USD\" },\n        \"categoryId\": \"CAT_ELECTRONICS_PHONES\"\n      }\n    ]\n  },\n  \"statusCode\": 200\n}\n```"
+			},
+			"response": [
+				{
+					"name": "Productos relacionados encontrados",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products/MLU475845508/related?limit=3",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"MLU475845508",
+								"related"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "3"
+								}
+							]
+						}
+					},
+					"status": "OK",
+					"code": 200,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"data\": {\n    \"products\": [\n      {\n        \"id\": \"MLU768416607\",\n        \"title\": \"OnePlus 12 512GB Blanco\",\n        \"description\": \"Diseño moderno y funcionalidad excepcional. Compatible con los últimos estándares.\",\n        \"price\": {\n          \"amount\": 376.65,\n          \"currency\": \"USD\"\n        },\n        \"categoryId\": \"CAT_ELECTRONICS_PHONES\",\n        \"status\": \"discontinued\",\n        \"isAvailable\": false\n      },\n      {\n        \"id\": \"MLU918103936\",\n        \"title\": \"OnePlus 12 512GB Titanio Natural\",\n        \"description\": \"Producto confiable con excelente rendimiento. Recomendado por expertos.\",\n        \"price\": {\n          \"amount\": 702.6,\n          \"currency\": \"USD\"\n        },\n        \"categoryId\": \"CAT_ELECTRONICS_PHONES\",\n        \"status\": \"discontinued\",\n        \"isAvailable\": false\n      },\n      {\n        \"id\": \"MLU362212502\",\n        \"title\": \"Google Pixel 8 Pro 256GB Titanio Natural\",\n        \"description\": \"Producto de alta calidad con tecnología de punta. Incluye garantía oficial del fabricante.\",\n        \"price\": {\n          \"amount\": 1194.86,\n          \"currency\": \"USD\"\n        },\n        \"categoryId\": \"CAT_ELECTRONICS_PHONES\",\n        \"status\": \"active\",\n        \"isAvailable\": true\n      }\n    ]\n  },\n  \"statusCode\": 200\n}"
+				}
+			]
+		},
+		{
+			"name": "Error - Producto no encontrado",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {",
+							"    pm.response.to.have.status(404);",
+							"});",
+							"",
+							"pm.test(\"Response has error message\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.error).to.exist;",
+							"    pm.expect(jsonData.message).to.exist;",
+							"    pm.expect(jsonData.statusCode).to.eql(404);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/INVALID_PRODUCT_ID",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"INVALID_PRODUCT_ID"
+					]
+				},
+				"description": "Ejemplo de request con ID de producto inválido para demostrar el manejo de errores."
+			},
+			"response": [
+				{
+					"name": "Producto no encontrado",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products/INVALID_PRODUCT_ID",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"INVALID_PRODUCT_ID"
+							]
+						}
+					},
+					"status": "Not Found",
+					"code": 404,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"error\": \"Not Found\",\n  \"message\": \"Product with id INVALID_PRODUCT_ID not found\",\n  \"statusCode\": 404\n}"
+				}
+			]
+		},
+		{
+			"name": "Error - Parámetros inválidos",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {",
+							"    pm.response.to.have.status(400);",
+							"});",
+							"",
+							"pm.test(\"Response has error message\", function () {",
+							"    const jsonData = pm.response.json();",
+							"    pm.expect(jsonData.error).to.exist;",
+							"    pm.expect(jsonData.message).to.exist;",
+							"    pm.expect(jsonData.statusCode).to.eql(400);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/api/v1/products/{{sampleProductId}}/related?limit=50",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"v1",
+						"products",
+						"{{sampleProductId}}",
+						"related"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "50",
+							"description": "Límite inválido (máximo permitido: 20)"
+						}
+					]
+				},
+				"description": "Ejemplo de request con parámetros inválidos (límite mayor al máximo permitido)."
+			},
+			"response": [
+				{
+					"name": "Límite inválido",
+					"originalRequest": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/api/v1/products/MLU475845508/related?limit=50",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"products",
+								"MLU475845508",
+								"related"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "50"
+								}
+							]
+						}
+					},
+					"status": "Bad Request",
+					"code": 400,
+					"_postman_previewlanguage": "json",
+					"header": [
+						{
+							"key": "Content-Type",
+							"value": "application/json; charset=utf-8"
+						}
+					],
+					"cookie": [],
+					"body": "{\n  \"error\": \"Bad Request\",\n  \"message\": \"Limit must be between 1 and 20\",\n  \"statusCode\": 400\n}"
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string",
+			"description": "Base URL del servidor de la API"
+		},
+		{
+			"key": "sampleProductId",
+			"value": "MLU475845508",
+			"type": "string",
+			"description": "ID de producto válido para testing"
+		},
+		{
+			"key": "sampleCategoryId",
+			"value": "CAT_ELECTRONICS_PHONES",
+			"type": "string",
+			"description": "ID de categoría válida para filtros"
+		},
+		{
+			"key": "defaultLimit",
+			"value": "10",
+			"type": "string",
+			"description": "Límite por defecto para paginación"
+		},
+		{
+			"key": "relatedLimit",
+			"value": "4",
+			"type": "string",
+			"description": "Límite por defecto para productos relacionados"
+		}
+	]
+}
